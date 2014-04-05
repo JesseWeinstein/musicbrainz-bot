@@ -166,8 +166,9 @@ class MusicBrainzClient(object):
         except mechanize.ControlNotFoundError: pass
         self.b.submit()
         page = self.b.response().read()
-        if "Thank you, your edit has been" not in page:
+        if "Thank you, your " not in page:
             if "already exists" not in page:
+                print page
                 raise Exception('unable to post edit')
             else:
                 return False
@@ -305,11 +306,11 @@ class MusicBrainzClient(object):
                 return False
         return True
 
-    def edit_work(self, work, update, edit_note, auto=False):
+    def edit_work(self, work, update, edit_note, auto=False, override=False):
         self.b.open(self.url("/work/%s/edit" % (work['gid'],)))
         self.b.select_form(predicate=lambda f: f.method == "POST" and "/edit" in f.action)
         if 'type' in update:
-            if self.b["edit-work.type_id"] != ['']:
+            if not override and self.b["edit-work.type_id"] != ['']:
                 print " * type already set, not changing"
                 return
             self.b["edit-work.type_id"] = [str(work['type'])]
